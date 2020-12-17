@@ -1,4 +1,4 @@
-console.log("On Action")
+console.log(document.domain, "Action")
 chrome.runtime.onMessage.addListener(startIt);
 let totalAttendance = [];
 let interval = [];
@@ -23,10 +23,12 @@ function startIt(message, sender, sendResponse) {
 }
 
 function takeAttendance() {
+    console.log("Taking attendance")
     if (document.domain === "meet.google.com") {
         meetAttendance();
     }
-    if (document.domain === "zoom.us" || document.domain === "us04web.zoom.us") {
+    if (document.domain === "us04web.zoom.us") {
+        console.log("Zoom Running")
         zoomAttendance();
     }
 }
@@ -37,11 +39,17 @@ const meetAttendance = () => {
     for (let i = 0; i < presentStudents.length; i++) {
         currentAttendance.push(presentStudents[i].innerHTML)
     }
-    totalAttendance.push(currentAttendance)
+    totalAttendance.push(currentAttendance);
 }
 
 const zoomAttendance = () => {
-
+    const currentAttendance = [];
+    const presentStudents = document.getElementsByClassName("participants-item__display-name");
+    console.log(presentStudents);
+    for (let i = 0; i < presentStudents.length; i++) {
+        currentAttendance.push(presentStudents[i].innerHTML)
+    }
+    totalAttendance.push(currentAttendance);
 }
 
 const organizeData = () => {
