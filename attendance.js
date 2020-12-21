@@ -35,19 +35,27 @@ const takeAttendance = () => {
 const meetAttendance = () => {
     const currentAttendance = [];
     const presentStudents = document.getElementsByClassName("ZjFb7c");
-    for (let i = 0; i < presentStudents.length; i++) {
-        currentAttendance.push(presentStudents[i].innerHTML)
+    if (presentStudents.length === 0) {
+        alert("Please show participants list")
+    } else {
+        for (let i = 0; i < presentStudents.length; i++) {
+            currentAttendance.push(presentStudents[i].innerHTML)
+        }
+        totalAttendance.push(currentAttendance);
     }
-    totalAttendance.push(currentAttendance);
 }
 
 const zoomAttendance = () => {
     const currentAttendance = [];
     const presentStudents = document.getElementsByClassName("participants-item__display-name");
-    for (let i = 0; i < presentStudents.length; i++) {
-        currentAttendance.push(presentStudents[i].innerHTML)
+    if (presentStudents.length === 0) {
+        alert("Please show participants list")
+    } else {
+        for (let i = 0; i < presentStudents.length; i++) {
+            currentAttendance.push(presentStudents[i].innerHTML)
+        }
+        totalAttendance.push(currentAttendance);
     }
-    totalAttendance.push(currentAttendance);
 }
 
 const organizeData = () => {
