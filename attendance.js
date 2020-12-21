@@ -1,4 +1,3 @@
-console.log(document.domain, "Action")
 chrome.runtime.onMessage.addListener(startIt);
 let totalAttendance = [];
 let interval = [];
@@ -11,8 +10,8 @@ let hours = today.getHours();
 let file_name = "Attendance:" + hours + "hrs-" + day + "-" + month + ".txt";
 
 function startIt(message, sender, sendResponse) {
-    console.log(message);
     if (message[0] === 1) {
+        console.log("Taking attendance");
         interval[intervalId++] = setInterval(takeAttendance, 10000);
     } else {
         for (let i = 0; i < interval.length; i++) {
@@ -22,13 +21,13 @@ function startIt(message, sender, sendResponse) {
     }
 }
 
-function takeAttendance() {
-    console.log("Taking attendance")
+const takeAttendance = () => {
     if (document.domain === "meet.google.com") {
+        console.log("Taking attendance from meet")
         meetAttendance();
     }
     if (document.domain === "us04web.zoom.us") {
-        console.log("Zoom Running")
+        console.log("Taking attendance from zoom")
         zoomAttendance();
     }
 }
@@ -45,7 +44,6 @@ const meetAttendance = () => {
 const zoomAttendance = () => {
     const currentAttendance = [];
     const presentStudents = document.getElementsByClassName("participants-item__display-name");
-    console.log(presentStudents);
     for (let i = 0; i < presentStudents.length; i++) {
         currentAttendance.push(presentStudents[i].innerHTML)
     }
@@ -58,30 +56,25 @@ const organizeData = () => {
     for (let i = 0; i < totalAttendance.length; i++) {
         if (totalAttendance[i] !== undefined) {
             for (let j = 0; j < totalAttendance[i].length; j++) {
-                console.log("Running0")
                 if (allStudents.indexOf(totalAttendance[i][j]) === -1) allStudents.push(totalAttendance[i][j]);
             }
         }
     }
-    console.log("Running1")
     let text = "Attendance of " + year + "-" + day + "-" + month + "hrs-" + hours + "\n";
     let arr = [text];
     for (let i = 0; i < allStudents.length; i++) {
-        console.log("Running2");
         text = allStudents[i];
         for (let j = 0; j < totalAttendance.length; j++) {
             let found = 0;
-            console.log("Array part", totalAttendance[i]);
             if (totalAttendance[i].indexOf(allStudents[i]) !== -1) found = 1;
             text += "," + found;
         }
         arr.push(text);
     }
-    console.log(arr);
     return arr;
 }
 
-function saveToFile() {
+const saveToFile = () => {
     const text = organizeData();
     console.log("Running3")
     const pData = new Blob(text, {type: 'text/plain'});

@@ -1,4 +1,3 @@
-console.log("POPUP Script in Action!");
 load();
 let bgpage = chrome.extension.getBackgroundPage();
 if (bgpage.word === "Page being used is ZOOM") {
@@ -31,6 +30,7 @@ window.onload = function () {
 
         function doIt(tabs) {
             chrome.tabs.sendMessage(tabs[0].id, data);
+            window.close();
         }
     });
 
@@ -41,6 +41,7 @@ window.onload = function () {
 
         function doIt(tabs) {
             chrome.tabs.sendMessage(tabs[0].id, data);
+            window.close();
         }
     });
 }
