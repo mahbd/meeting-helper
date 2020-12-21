@@ -74,7 +74,7 @@ const organizeData = () => {
         text = allStudents[i];
         for (let j = 0; j < totalAttendance.length; j++) {
             let found = 0;
-            if (totalAttendance[i].indexOf(allStudents[i]) !== -1) found = 1;
+            if (totalAttendance[j].indexOf(allStudents[i]) !== -1) found = 1;
             text += "," + found;
         }
         arr.push(text);
