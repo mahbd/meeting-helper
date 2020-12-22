@@ -36,11 +36,12 @@ Show participants list like below
 <br> Image for zoom <br>
 ![alt "Meet participants list"](https://drive.google.com/uc?export=download&id=1AKwkyypou17lco9HdUjjI0-JGP9s0VK8)
 <br>For meet<br>
-Now click on the extension icon and click start recording.
-![alt "Start recording"](https://drive.google.com/uc?export=download&id=1BcaMLklGGsu_e59_Q30Sfi794cSQm6eV)
+Now click on the extension icon and click start.
+![alt "Start"](https://drive.google.com/uc?export=download&id=16nsh1IVXdVXyV316-LVrmQsSHZJDNpxZ)
 <br>
 Before ending the meeting click save recording. As soon as you click save a text file will be downloaded.
-You're down. You may visualize your data using below python script.
+![alt "Save"](https://drive.google.com/uc?export=download&id=10y2rpDARMckfEqAGfqxbPFNWr6zkFVP9)
+You're done. You may visualize your data using below python script.
 ## Visualize using python script
 ### requirements 
 numpy, matplotlib, seaborn
