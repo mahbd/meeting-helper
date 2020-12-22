@@ -12,7 +12,7 @@
   
     "content_scripts": [
       {
-        "matches": ["*://meet.google.com/*" , "*://zoom.us/*","*://us04web.zoom.us/*"],
+        "matches": ["*://meet.google.com/*" , "*://zoom.us/*","*://us04web.zoom.us/*", "*://bdren.zoom.us/*"],
         "js": ["attendance.js"]
       }
     ],

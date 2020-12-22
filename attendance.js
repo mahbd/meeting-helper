@@ -26,7 +26,7 @@ const takeAttendance = () => {
         console.log("Taking attendance from meet")
         meetAttendance();
     }
-    if (document.domain === "us04web.zoom.us") {
+    if (document.domain === "us04web.zoom.us" || document.domain === "bdren.zoom.us") {
         console.log("Taking attendance from zoom")
         zoomAttendance();
     }
@@ -77,6 +77,7 @@ const organizeData = () => {
             if (totalAttendance[j].indexOf(allStudents[i]) !== -1) found = 1;
             text += "," + found;
         }
+        text += '\n';
         arr.push(text);
     }
     return arr;
