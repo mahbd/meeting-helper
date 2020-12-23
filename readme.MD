@@ -1,9 +1,9 @@
-#Zoom Meet Attendance
+# Zoom Meet Attendance
 You can use this to who when attended the meeting and when left. This extension will 
 collect information and will make a text file. You can create a graph using below 
 Python script. All activities of this extension happens on your browser and never 
 send any information anywhere.
-##Limitation
+## Limitation
 You must show participants list otherwise extension won't be able to collect information.
 ![alt "show extension"](https://drive.google.com/uc?export=download&id=1F9D-Fovs3fmveWScrEf43vuJDmtNvH_T)
 ## How to use
