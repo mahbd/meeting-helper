@@ -14,19 +14,8 @@ You must show participants list otherwise extension won't be able to collect inf
 git clone https://github.com/mahbd/zoom_meet_attendance
 </pre>
 </li>
-<li><h5>Enable developer mode in chrome</h5></li>
-<img src="https://drive.google.com/uc?export=download&id=1LYB9jHa3STj97wMqAeGFqfuLlEAxZ8FE"  alt="manage extension"/>
-<br>
-<img src="https://drive.google.com/uc?export=download&id=12sWBo-jo23NJYl5fd8h9tMizuojjUnJ-" alt="Turn on developer mode" />
-<li><h5>Load cloned folder</h5></li>
-<img src="https://drive.google.com/uc?export=download&id=1gPSoMNuWX8f7gfTb6U95ikn9WRNTxkID" alt="Load unpacked">
-<br>
-<img src="https://drive.google.com/uc?export=download&id=16wd8ujRMHmVoAvEwEDyubQVlUCryl08z" alt="Open folder">
-<br>
-<img src="https://drive.google.com/uc?export=download&id=1q-bIVI3PFSLkvO8kXUQ3viJR_Zh9zsrO" alt="Loaded">
-<li>Pin the extension</li>
-<img src="https://drive.google.com/uc?export=download&id=14N3Yp5VuZf4yShYQ8T7t-AdvWS8aEkQM" alt="Pin extension">
-<br>
+If you don't know how to load extension in chrome use this 
+<a href="https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/">guide</a>.
 </ol>
 
 ### Start the extension
@@ -43,6 +32,9 @@ Before ending the meeting click save recording. As soon as you click save a text
 ![alt "Save"](https://drive.google.com/uc?export=download&id=10y2rpDARMckfEqAGfqxbPFNWr6zkFVP9)
 You're done. You may visualize your data using below python script.
 ## Visualize using python script
+If you want better visualization experience use you may use this 
+<a href="https://github.com/mahbd/zoom_meet_attendance_visualizer">module</a>. Or use below code for basic
+visualization.
 ### requirements 
 numpy, matplotlib, seaborn
 ### code 
@@ -63,7 +55,7 @@ data = np.array(data)
 print(data)
 a4_dims = (11.7, 8.27)
 fig, ax = pyplot.subplots(figsize=a4_dims)
-sns.heatmap(ax=ax, data=data)
+sns.heatmap(ax=ax, data=data, cbar=False)
 ax.set_title(title)
 ax.set_yticklabels(names)
 plt.setp(ax.get_yticklabels(), rotation=0, ha="right",
