@@ -1,5 +1,6 @@
 chrome.runtime.onMessage.addListener(startIt);
 let totalAttendance = [];
+let percentAttendance = {};
 let rangeMembers = [];
 let interval = [];
 let intervalId = 0;
@@ -24,8 +25,19 @@ function startIt(message, sender, sendResponse) {
       clearInterval(interval[i]);
     }
     saveToFile();
+  } else if (message[0] === 3) {
+    const data = {rangeMembers, allMembers: Object.keys(percentAttendance)}
+    chrome.runtime.sendMessage({memberList: JSON.stringify(data)}, function (response) {
+    });
+  } else if (message[0] === 4) {
+    rangeMembers.push(message[1]);
+  } else if (message[0] === 5) {
+    const memberIndex = rangeMembers.indexOf(message[1]);
+    if (memberIndex !== -1) {
+      rangeMembers.splice(memberIndex, 1);
+    }
   } else {
-    console.log(message);
+    console.log(message)
   }
 }
 
@@ -49,7 +61,8 @@ const meetAttendance = () => {
   }
   for (let member of memberList) {
     let memberName = member.getElementsByClassName("ZjFb7c")[0].innerText;
-    currentAttendance.push(memberName)
+    currentAttendance.push(memberName);
+    percentAttendance[memberName] = (percentAttendance[memberName] || 0) + 1;
   }
   totalAttendance.push(currentAttendance);
   genAbsentMembers(currentAttendance);
@@ -82,7 +95,7 @@ const zoomAttendance = () => {
   genExtraMembers(currentAttendance);
 }
 
-const getRangeMembers = (start, end, included, excluded) => {
+const getRangeMembers = (start, end, included) => {
   for (let i = start; i <= end; i++) {
     rangeMembers.push(i);
   }
@@ -116,28 +129,24 @@ const genExtraMembers = (currentMembers) => {
 
 function saveMuted(mutedList = []) {
   let data = {arr: mutedList};
-  console.log(mutedList);
   chrome.runtime.sendMessage({mutedList: JSON.stringify(data)}, function (response) {
   });
 }
 
 function saveNoVideo(mutedList = []) {
   let data = {arr: mutedList};
-  console.log(mutedList);
   chrome.runtime.sendMessage({noVideo: JSON.stringify(data)}, function (response) {
   });
 }
 
 function saveAbsent(mutedList = []) {
   let data = {arr: mutedList};
-  console.log(mutedList);
   chrome.runtime.sendMessage({absentMembers: JSON.stringify(data)}, function (response) {
   });
 }
 
 function saveExtra(mutedList = []) {
   let data = {arr: mutedList};
-  console.log(mutedList);
   chrome.runtime.sendMessage({extraMembers: JSON.stringify(data)}, function (response) {
   });
 }

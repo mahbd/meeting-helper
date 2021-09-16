@@ -8,20 +8,29 @@ let params = {
   currentWindow: true
 }
 
-const buttonList = ["mic", "video", "people-cross", "people-plus", "settings"];
+let allMembers = [];
+let rangeMembers = [];
+
+const buttonList = ["mic", "video", "people-cross", "people-plus", "live", "settings"];
 
 function handleMessage(message, sender, sendResponse) {
-  const showing = window.sessionStorage.getItem("showing");
-  if (showing === "0" && message.mutedList) {
-    renderMuted(JSON.parse(message.mutedList).arr);
-  } else if (showing === "1" && message.noVideo) {
-    renderMuted(JSON.parse(message.noVideo).arr);
-  } else if (showing === "2" && message.absentMembers) {
-    renderMuted(JSON.parse(message.absentMembers).arr);
-  } else if (showing === "3" && message.extraMembers) {
-    renderMuted(JSON.parse(message.extraMembers).arr);
-  }
-  sendResponse({status: true});
+  chrome.storage.local.get(function (result) {
+    const showing = result.showing;
+    if (showing === "0" && message.mutedList) {
+      renderMuted(JSON.parse(message.mutedList).arr);
+    } else if (showing === "1" && message.noVideo) {
+      renderMuted(JSON.parse(message.noVideo).arr);
+    } else if (showing === "2" && message.absentMembers) {
+      renderMuted(JSON.parse(message.absentMembers).arr);
+    } else if (showing === "3" && message.extraMembers) {
+      renderMuted(JSON.parse(message.extraMembers).arr);
+    } else if (message.memberList) {
+      allMembers = JSON.parse(message.memberList).allMembers;
+      rangeMembers = JSON.parse(message.memberList).rangeMembers;
+      fillSettingsHelper();
+    }
+    sendResponse({status: true});
+  })
 }
 
 window.onload = function () {
@@ -40,13 +49,22 @@ window.onload = function () {
     }
   });
 
+  document.getElementById("add-member-btn").addEventListener("click", function () {
+    const member = document.getElementById("included").value;
+    if (member) {
+      addMember(member);
+    }
+  });
+
   for (let button of buttonList) {
     document.getElementById(button).addEventListener("click", function () {
       inactiveAll();
-      window.sessionStorage.setItem("showing", buttonList.indexOf(button).toString())
+      chrome.storage.local.set({showing: buttonList.indexOf(button).toString()}, function () {
+      });
       document.getElementById(button).classList.add("active");
       if (button === "settings") {
         document.getElementById("setting-form").style.display = "block";
+        fillSettingsRequest();
       }
     });
   }
@@ -72,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // onClick's logic below:
   chrome.storage.local.get(function (result) {
     const running = result.running;
+    const showing = result.showing;
     if (running === "1") {
       document.getElementById('startButton').style.display = "none";
       document.getElementById('stopButton').style.display = "block";
@@ -80,6 +99,9 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('startButton').style.display = "block";
       document.getElementById('stopButton').style.display = "none";
       document.getElementById('nav-btn').style.display = "none";
+    }
+    if (showing === "1") {
+      document.getElementById("settings").click();
     }
   });
 });
@@ -104,6 +126,75 @@ function renderMuted(arr) {
     let child = document.createElement('p');
     child.innerText = "No member(s)"
     parent.appendChild(child);
+  }
+}
+
+function addMember(member) {
+  chrome.tabs.query(params, doIt);
+
+  function doIt(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, [4, member]);
+  }
+
+  rangeMembers.push(member);
+  fillSettingsHelper();
+}
+
+function removeMember(member) {
+  chrome.tabs.query(params, doIt);
+
+  function doIt(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, [5, member]);
+  }
+
+  const memberIndex = rangeMembers.indexOf(member);
+  if (memberIndex !== -1) {
+    rangeMembers.splice(memberIndex, 1);
+  }
+  fillSettingsHelper();
+}
+
+function getMemberItem(value, f = "add") {
+  let child = document.createElement("li");
+  let btnChild = document.createElement("button");
+  let textChild = document.createElement('p');
+  textChild.innerText = value;
+  if (f === "remove") {
+    btnChild.innerText = "X";
+    btnChild.onclick = () => removeMember(value);
+  } else if (f === "add") {
+    btnChild.innerText = "+";
+    btnChild.onclick = () => addMember(value);
+  }
+  textChild.appendChild(btnChild);
+  child.appendChild(textChild);
+  return child;
+}
+
+function fillSettingsRequest() {
+  chrome.tabs.query(params, doIt);
+
+  function doIt(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, [3]);
+  }
+}
+
+function fillSettingsHelper() {
+  let suggestedMembers = [];
+  for (let member of allMembers) {
+    if (allMembers.indexOf(member) !== -1) {
+      suggestedMembers.push(member);
+    }
+  }
+  const suggested = document.getElementById("suggested-list");
+  suggested.innerHTML = "";
+  for (let member of suggestedMembers) {
+    suggested.appendChild(getMemberItem(member));
+  }
+  const current = document.getElementById("current-member-list");
+  current.innerHTML = "";
+  for (let member of rangeMembers) {
+    current.appendChild(getMemberItem(member, "remove"));
   }
 }
 

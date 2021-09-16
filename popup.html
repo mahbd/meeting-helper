@@ -15,25 +15,27 @@
     <button id="video"><img src="video-off.svg" alt="Video"></button>
     <button id="people-cross"><img src="person-cross.svg" alt="Cross"></button>
     <button id="people-plus"><img src="person-plus.svg" alt="Plus"></button>
-    <button id="settings"><img src="settings.svg" alt="Setting"></button>
+    <button id="live"><img src="live.svg" alt="Live"></button>
+    <button id="settings"><img src="plus-icon.svg" alt="Setting"></button>
 </div>
 
 <div id="live-result">
 </div>
 <div id="setting-form" style="display: none">
     <p style="font-size: 20px; color: #04AA6D">Settings</p>
-    <p style="color: blue; font-weight: bolder">Range:</p>
-    Start: <input style="width: 80px; display: inline" type="text" id="min-range"> End:
-    <input style="display: inline; width: 80px" type="text" id="max-range">
     <p style="color: blue; font-weight: bolder">Include:</p>
-    <input style="width: 100%" type="text" id="included">
-    <p style="color: blue; font-weight: bolder">Exclude:</p>
-    <input style="width: 100%; margin-right: 10px" type="text" id="excluded">
-    <button class="myButton">Save</button>
+    <input style="width: 230px" type="text" id="included">
+    <button class="myButton" id="add-member-btn">Add</button>
+    <p>Suggested Member List</p>
+    <ol id="suggested-list">
+    </ol>
+    <p>Current Member List</p>
+    <ol id="current-member-list">
+    </ol>
 </div>
 
 <button type="button" id="startButton" class="myButton">Start</button>
-<button type="button" id="stopButton" class="myButton">Stop</button>
+<button type="button" id="stopButton" class="myButton" style="margin-top: 5px">Stop</button>
 
 <script src="popup.js"></script>
 </body>
