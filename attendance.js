@@ -1,6 +1,7 @@
 chrome.runtime.onMessage.addListener(startIt);
-let totalAttendance = [];
+let arrayAttendance = [];
 let percentAttendance = {};
+let totalSeconds = 0;
 let rangeMembers = [];
 let interval = [];
 let intervalId = 0;
@@ -54,6 +55,7 @@ const takeAttendance = () => {
 
 const meetAttendance = () => {
   const currentAttendance = [];
+  const currentAllStatus = {};
   let memberList = document.getElementsByClassName("KV1GEc");
   if (memberList.length === 0) {
     document.getElementsByClassName("VfPpkd-Bz112c-Jh9lGc")[8].click();
@@ -61,16 +63,19 @@ const meetAttendance = () => {
   }
   for (let member of memberList) {
     let memberName = member.getElementsByClassName("ZjFb7c")[0].innerText;
+    currentAllStatus[memberName] = 5;
     currentAttendance.push(memberName);
     percentAttendance[memberName] = (percentAttendance[memberName] || 0) + 1;
   }
-  totalAttendance.push(currentAttendance);
+  arrayAttendance.push(currentAllStatus);
   genAbsentMembers(currentAttendance);
   genExtraMembers(currentAttendance);
+  totalSeconds += 1;
 }
 
 const zoomAttendance = () => {
   const currentAttendance = [];
+  const currentAllStatus = {};
   let muted = [];
   let noVideo = [];
   let memberList = document.getElementsByClassName("participants-item__item-layout");
@@ -80,32 +85,26 @@ const zoomAttendance = () => {
   }
   for (let student of memberList) {
     let studentName = student.getElementsByClassName("participants-item__display-name")[0].innerText;
+    currentAllStatus[studentName] = 5;
     currentAttendance.push(studentName);
     if (student.getElementsByClassName("participants-icon__participants-unmute").length !== 0) {
       muted.push(studentName);
+      currentAllStatus[studentName] -= 2;
     }
     if (student.getElementsByClassName("participants-icon__participant-video--started participants-icon__participant-video").length === 0) {
       noVideo.push(studentName);
+      currentAllStatus[studentName] -= 3;
     }
   }
-  totalAttendance.push(currentAttendance);
+  arrayAttendance.push(currentAllStatus);
   saveMuted(muted);
   saveNoVideo(noVideo);
   genAbsentMembers(currentAttendance);
   genExtraMembers(currentAttendance);
+  totalSeconds += 1;
+  genLivePresent(totalSeconds);
 }
 
-const getRangeMembers = (start, end, included) => {
-  for (let i = start; i <= end; i++) {
-    rangeMembers.push(i);
-  }
-  for (let i of included.split(",")) {
-    rangeMembers.push(i);
-  }
-  for (let i of excluded.split(",")) {
-
-  }
-}
 
 const genAbsentMembers = (currentMembers) => {
   const absentMembers = [];
@@ -152,22 +151,16 @@ function saveExtra(mutedList = []) {
 }
 
 const organizeData = () => {
-  console.table(totalAttendance);
-  const allStudents = [];
-  for (let i = 0; i < totalAttendance.length; i++) {
-    if (totalAttendance[i] !== undefined) {
-      for (let j = 0; j < totalAttendance[i].length; j++) {
-        if (allStudents.indexOf(totalAttendance[i][j]) === -1) allStudents.push(totalAttendance[i][j]);
-      }
-    }
-  }
+  const allStudents = Object.keys(percentAttendance);
   let text = "Attendance of " + year + "-" + day + "-" + month + "hrs-" + hours + "\n";
   let arr = [text];
   for (let i = 0; i < allStudents.length; i++) {
     text = allStudents[i];
-    for (let j = 0; j < totalAttendance.length; j++) {
+    for (let j = 0; j < arrayAttendance.length; j++) {
       let found = 0;
-      if (totalAttendance[j].indexOf(allStudents[i]) !== -1) found = 1;
+      if (arrayAttendance[j][allStudents[i]] !== undefined) {
+        found = arrayAttendance[j][allStudents[i]] + 1;
+      }
       text += "," + found;
     }
     text += '\n';
@@ -178,7 +171,6 @@ const organizeData = () => {
 
 const saveToFile = () => {
   const text = organizeData();
-  console.log("Running3")
   const pData = new Blob(text, {type: 'text/plain'});
   const a = document.createElement("a");
   document.body.appendChild(a);
