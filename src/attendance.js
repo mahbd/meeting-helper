@@ -6,6 +6,23 @@ let file_name = "Attendance:" + hours + "hrs-" + day + "-" + month + ".txt";
 window.onload = function () {
   window.sessionStorage.clear();
   chrome.storage.local.clear();
+
+
+  if (document.domain === "us04web.zoom.us" || document.domain === "bdren.zoom.us" || document.domain === "zoom.us") {
+    if (document.getElementsByClassName("VahdFMz0")[0]) {
+      document.getElementsByClassName("VahdFMz0")[0].click();
+      setTimeout(() => {
+        const responseOpen = window.confirm("Want to start meeting from browser?");
+        if (responseOpen) {
+          const xpath = "//a[text()='Join from Your Browser']";
+          const matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+          if (matchingElement) {
+            matchingElement.click();
+          }
+        }
+      }, 1000);
+    }
+  }
 }
 
 const startIt = (message, sender, sendResponse) => {
@@ -36,7 +53,7 @@ const takeAttendance = () => {
   if (document.domain === "meet.google.com") {
     meetAttendance();
   }
-  if (document.domain === "us04web.zoom.us" || document.domain === "bdren.zoom.us") {
+  if (document.domain === "us04web.zoom.us" || document.domain === "bdren.zoom.us" || document.domain === "zoom.us") {
     zoomAttendance();
   }
 }
@@ -114,6 +131,7 @@ const genAbsentMembers = (currentMembers) => {
       absentMembers.push(member);
     }
   }
+  absentMembers.sort();
   let data = {arr: absentMembers};
   chrome.runtime.sendMessage({absentMembers: JSON.stringify(data)}, function (response) {
   });
@@ -126,19 +144,22 @@ const genExtraMembers = (currentMembers) => {
       extraMembers.push(member);
     }
   }
+  extraMembers.sort();
   let data = {arr: extraMembers};
   chrome.runtime.sendMessage({extraMembers: JSON.stringify(data)}, function (response) {
   });
 }
 
 const saveMuted = (mutedList = []) => {
+  mutedList.sort();
   let data = {arr: mutedList};
   chrome.runtime.sendMessage({mutedList: JSON.stringify(data)}, function (response) {
   });
 }
 
-const saveNoVideo = (mutedList = []) => {
-  let data = {arr: mutedList};
+const saveNoVideo = (noVideoList = []) => {
+  noVideoList.sort();
+  let data = {arr: noVideoList};
   chrome.runtime.sendMessage({noVideo: JSON.stringify(data)}, function (response) {
   });
 }
