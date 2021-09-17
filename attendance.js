@@ -31,7 +31,9 @@ function startIt(message, sender, sendResponse) {
     chrome.runtime.sendMessage({memberList: JSON.stringify(data)}, function (response) {
     });
   } else if (message[0] === 4) {
-    rangeMembers.push(message[1]);
+    if (rangeMembers.indexOf(message[1]) === -1) {
+      rangeMembers.push(message[1]);
+    }
   } else if (message[0] === 5) {
     const memberIndex = rangeMembers.indexOf(message[1]);
     if (memberIndex !== -1) {
@@ -71,6 +73,7 @@ const meetAttendance = () => {
   genAbsentMembers(currentAttendance);
   genExtraMembers(currentAttendance);
   totalSeconds += 1;
+  genLivePresent();
 }
 
 const zoomAttendance = () => {
@@ -86,6 +89,7 @@ const zoomAttendance = () => {
   for (let student of memberList) {
     let studentName = student.getElementsByClassName("participants-item__display-name")[0].innerText;
     currentAllStatus[studentName] = 5;
+    percentAttendance[studentName] = (percentAttendance[studentName] || 0) + 1;
     currentAttendance.push(studentName);
     if (student.getElementsByClassName("participants-icon__participants-unmute").length !== 0) {
       muted.push(studentName);
@@ -102,7 +106,18 @@ const zoomAttendance = () => {
   genAbsentMembers(currentAttendance);
   genExtraMembers(currentAttendance);
   totalSeconds += 1;
-  genLivePresent(totalSeconds);
+  genLivePresent();
+}
+
+
+const genLivePresent = () => {
+  const table = [];
+  for (let member in percentAttendance) {
+    table.push([member, Math.ceil((percentAttendance[member] / totalSeconds) * 100)]);
+  }
+  let data = {arr: table};
+  chrome.runtime.sendMessage({livePresent: JSON.stringify(data)}, function (response) {
+  });
 }
 
 

@@ -14,6 +14,7 @@ let rangeMembers = [];
 const buttonList = ["mic", "video", "people-cross", "people-plus", "live", "settings"];
 
 function handleMessage(message, sender, sendResponse) {
+  sendResponse({status: true});
   chrome.storage.local.get(function (result) {
     const showing = result.showing;
     if (showing === "0" && message.mutedList) {
@@ -24,12 +25,13 @@ function handleMessage(message, sender, sendResponse) {
       renderMuted(JSON.parse(message.absentMembers).arr);
     } else if (showing === "3" && message.extraMembers) {
       renderMuted(JSON.parse(message.extraMembers).arr);
+    } else if (showing === "4" && message.livePresent) {
+      renderLive(JSON.parse(message.livePresent).arr)
     } else if (message.memberList) {
       allMembers = JSON.parse(message.memberList).allMembers;
       rangeMembers = JSON.parse(message.memberList).rangeMembers;
       fillSettingsHelper();
     }
-    sendResponse({status: true});
   })
 }
 
@@ -51,6 +53,7 @@ window.onload = function () {
 
   document.getElementById("add-member-btn").addEventListener("click", function () {
     const member = document.getElementById("included").value;
+    document.getElementById("included").value = "";
     if (member) {
       addMember(member);
     }
@@ -100,8 +103,8 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('stopButton').style.display = "none";
       document.getElementById('nav-btn').style.display = "none";
     }
-    if (showing === "1") {
-      document.getElementById("settings").click();
+    if (showing) {
+      document.getElementById(buttonList[parseInt(showing)]).click()
     }
   });
 });
@@ -136,8 +139,12 @@ function addMember(member) {
     chrome.tabs.sendMessage(tabs[0].id, [4, member]);
   }
 
-  rangeMembers.push(member);
-  fillSettingsHelper();
+  if (rangeMembers.indexOf(member) !== -1) {
+    alert("Member already exist")
+  } else {
+    rangeMembers.push(member);
+  }
+  fillSettingsRequest();
 }
 
 function removeMember(member) {
@@ -151,7 +158,7 @@ function removeMember(member) {
   if (memberIndex !== -1) {
     rangeMembers.splice(memberIndex, 1);
   }
-  fillSettingsHelper();
+  fillSettingsRequest();
 }
 
 function getMemberItem(value, f = "add") {
@@ -180,9 +187,11 @@ function fillSettingsRequest() {
 }
 
 function fillSettingsHelper() {
+  let parent = document.getElementById("live-result");
+  parent.innerHTML = "";
   let suggestedMembers = [];
   for (let member of allMembers) {
-    if (allMembers.indexOf(member) !== -1) {
+    if (rangeMembers.indexOf(member) === -1) {
       suggestedMembers.push(member);
     }
   }
@@ -196,5 +205,23 @@ function fillSettingsHelper() {
   for (let member of rangeMembers) {
     current.appendChild(getMemberItem(member, "remove"));
   }
+}
+
+const renderLive = (tableArr) => {
+  const table = document.createElement('table')
+  for (let rowArr of tableArr) {
+    let row = document.createElement('tr');
+    let col1 = document.createElement('td');
+    let col2 = document.createElement('td');
+    col1.innerText = rowArr[0];
+    col2.innerText = `${rowArr[1]} %`;
+    row.appendChild(col1);
+    row.appendChild(col2);
+    table.appendChild(row);
+  }
+  document.getElementById("setting-form").style.display = "none";
+  let parent = document.getElementById("live-result");
+  parent.innerHTML = "";
+  parent.appendChild(table);
 }
 
