@@ -1,12 +1,29 @@
 let arrayAttendance = [], intervalId = 0, interval = [], percentAttendance = {}, rangeMembers = [], totalSeconds = 0;
 let today = new Date();
 let month = today.getMonth(), year = today.getFullYear(), day = today.getDay(), hours = today.getHours();
-let file_name = "Attendance:" + hours + "hrs-" + day + "-" + month + ".txt";
+let file_name = "Attendance:" + hours + "hrs-" + day + "-" + month;
+
+let BrowserInstance = undefined;
+let browserName = undefined;
+const firefox = "firefox";
+const chromeB = "chrome";
+if (navigator.userAgent.indexOf("Chrome") !== -1) {
+  BrowserInstance = chrome;
+  browserName = chromeB;
+} else if (navigator.userAgent.indexOf("Firefox") !== -1) {
+  BrowserInstance = browser;
+  browserName = firefox;
+} else {
+  alert('Browser is not supported for Meeting helper. Use Firefox or Google Chrome')
+}
+
+const sendMessageTab = (message) => {
+  if (browserName === firefox || browserName === chromeB) BrowserInstance.runtime.sendMessage(message);
+}
 
 window.onload = function () {
-  window.sessionStorage.clear();
-  chrome.storage.local.clear();
-
+  BrowserInstance.storage.local.set({running: "0"});
+  BrowserInstance.storage.local.set({showing: "5"});
 
   if (document.domain === "us04web.zoom.us" || document.domain === "bdren.zoom.us" || document.domain === "zoom.us") {
     if (document.getElementsByClassName("VahdFMz0")[0]) {
@@ -35,8 +52,7 @@ const startIt = (message, sender, sendResponse) => {
     saveToFile();
   } else if (message[0] === 3) {
     const data = {rangeMembers, allMembers: Object.keys(percentAttendance)}
-    chrome.runtime.sendMessage({memberList: JSON.stringify(data)}, function (response) {
-    });
+    sendMessageTab({memberList: JSON.stringify(data)});
   } else if (message[0] === 4) {
     if (rangeMembers.indexOf(message[1]) === -1) {
       rangeMembers.push(message[1]);
@@ -79,6 +95,7 @@ const meetAttendance = () => {
   genLivePresent();
 }
 
+// Extract information from zoom
 const zoomAttendance = () => {
   totalSeconds += 1;
   const currentAttendance = [];
@@ -86,6 +103,7 @@ const zoomAttendance = () => {
   let muted = [];
   let noVideo = [];
   let memberList = document.getElementsByClassName("participants-item__item-layout");
+  //
   if (memberList.length === 0) {
     document.getElementsByClassName("footer-button__participants-icon")[0].click();
     memberList = document.getElementsByClassName("participants-item__item-layout");
@@ -112,18 +130,18 @@ const zoomAttendance = () => {
   genLivePresent();
 }
 
-
+// Send message to plugin with percent of present time
 const genLivePresent = () => {
   const table = [];
   for (let member in percentAttendance) {
     table.push([member, Math.ceil((percentAttendance[member] / totalSeconds) * 100)]);
   }
+  table.sort((a, b) => a[1] - b[1]);
   let data = {arr: table};
-  chrome.runtime.sendMessage({livePresent: JSON.stringify(data)}, function (response) {
-  });
+  sendMessageTab({livePresent: JSON.stringify(data)});
 }
 
-
+// Send message to plugin with user list of absent members
 const genAbsentMembers = (currentMembers) => {
   const absentMembers = [];
   for (let member of rangeMembers) {
@@ -133,10 +151,10 @@ const genAbsentMembers = (currentMembers) => {
   }
   absentMembers.sort();
   let data = {arr: absentMembers};
-  chrome.runtime.sendMessage({absentMembers: JSON.stringify(data)}, function (response) {
-  });
+  sendMessageTab({absentMembers: JSON.stringify(data)});
 }
 
+// Send message to plugin with user list of member who is not in range
 const genExtraMembers = (currentMembers) => {
   const extraMembers = [];
   for (let member of currentMembers) {
@@ -146,55 +164,80 @@ const genExtraMembers = (currentMembers) => {
   }
   extraMembers.sort();
   let data = {arr: extraMembers};
-  chrome.runtime.sendMessage({extraMembers: JSON.stringify(data)}, function (response) {
-  });
+  sendMessageTab({extraMembers: JSON.stringify(data)});
 }
 
+// Send message to plugin with user list of microphone off
 const saveMuted = (mutedList = []) => {
   mutedList.sort();
   let data = {arr: mutedList};
-  chrome.runtime.sendMessage({mutedList: JSON.stringify(data)}, function (response) {
-  });
+  sendMessageTab({mutedList: JSON.stringify(data)});
 }
 
+// Send message to plugin with user list of video off
 const saveNoVideo = (noVideoList = []) => {
   noVideoList.sort();
   let data = {arr: noVideoList};
-  chrome.runtime.sendMessage({noVideo: JSON.stringify(data)}, function (response) {
-  });
+  sendMessageTab({noVideo: JSON.stringify(data)});
 }
 
+// Color per column for HTML report
+const generateColumnColor = (code) => {
+  if (code === 6) return "<span style=\"background-color: green; width: 1px; height: 20px; display: inline-block\"></span>";
+  else if (code === 4) return "<span style=\"background-color: blue; width: 1px; height: 20px; display: inline-block\"></span>"
+  else if (code === 3) return "<span style=\"background-color: yellow; width: 1px; height: 20px; display: inline-block\"></span>";
+  else if (code === 1) return "<span style=\"background-color: black; width: 1px; height: 20px; display: inline-block\"></span>";
+  else return "<span style=\"background-color: red; width: 1px; height: 20px; display: inline-block\"></span>";
+}
+
+// Create array of html and text for report
 const organizeData = () => {
   const allStudents = Object.keys(percentAttendance);
   let text = "Attendance of " + year + "-" + day + "-" + month + "hrs-" + hours + "\n";
   let arr = [text];
+  const rowArray = [`<h1>${text}</h1>`, "<table>", "<tr>"];
   for (let i = 0; i < allStudents.length; i++) {
+    let htmlText = `<td>${allStudents[i]}</td><td>`;
     text = allStudents[i];
     for (let j = 0; j < arrayAttendance.length; j++) {
       let found = 0;
       if (arrayAttendance[j][allStudents[i]] !== undefined) {
         found = arrayAttendance[j][allStudents[i]] + 1;
       }
+      htmlText += generateColumnColor(found)
       text += "," + found;
     }
+    htmlText += "</td></tr>"
     text += '\n';
     arr.push(text);
+    rowArray.push(htmlText);
   }
-  return arr;
+  return [arr, rowArray];
 }
 
 const saveToFile = () => {
-  const text = organizeData();
-  const pData = new Blob(text, {type: 'text/plain'});
-  const a = document.createElement("a");
+  // Download text report
+  const [arr, rowArray] = organizeData();
+  const pData = new Blob(arr, {type: 'text/plain'});
+  let a = document.createElement("a");
   document.body.appendChild(a);
   a.style = "display: none";
   a.href = URL.createObjectURL(pData);
-  a.download = file_name;
+  a.download = file_name + ".txt";
   a.click();
+  URL.revokeObjectURL(a.href)
+  a.remove();
 
+  // Download HTML report
+  const htmlData = new Blob(rowArray, {type: 'text/plain'});
+  a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
+  a.href = URL.createObjectURL(htmlData);
+  a.download = file_name + ".html";
+  a.click();
   URL.revokeObjectURL(a.href)
   a.remove();
 }
 
-chrome.runtime.onMessage.addListener(startIt);
+BrowserInstance.runtime.onMessage.addListener(startIt);

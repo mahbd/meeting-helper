@@ -1,16 +1,34 @@
-let params = {active: true, currentWindow: true};
 let allMembers = [], rangeMembers = [];
 const buttonList = ["mic", "video", "people-cross", "people-plus", "live", "settings"];
+let BrowserInstance = undefined, browserName = undefined;
+const firefox = "firefox", chromeB = "chrome";
+
+if (navigator.userAgent.indexOf("Chrome") !== -1) {
+  browserName = chromeB;
+  BrowserInstance = chrome;
+} else if (navigator.userAgent.indexOf("Firefox") !== -1) {
+  browserName = firefox;
+  BrowserInstance = browser;
+} else {
+  alert('Browser is not supported for Meeting helper. Use Firefox or Google Chrome');
+}
+
+const sendMessage = (message) => {
+  if (browserName === firefox || browserName === chromeB) {
+    BrowserInstance.tabs.query({active: true, currentWindow: true},
+      tabs => BrowserInstance.tabs.sendMessage(tabs[0].id, message));
+  }
+}
 
 const addMember = (member) => {
-  chrome.tabs.query(params, tabs => chrome.tabs.sendMessage(tabs[0].id, [4, member]));
+  sendMessage([4, member]);
 
   if (rangeMembers.indexOf(member) !== -1) {
     alert("Member already exist")
   } else {
     rangeMembers.push(member);
   }
-  fillSettingsRequest();
+  sendMessage([3]); // request for all members and rangeMembers
 }
 
 const fillSettingsHelper = () => {
@@ -34,24 +52,19 @@ const fillSettingsHelper = () => {
   }
 }
 
-const fillSettingsRequest = () => {
-  chrome.tabs.query(params, doIt);
-
-  function doIt(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, [3]);
-  }
-}
-
+// Item of list of members
 const generateMemberItem = (value, f = "add") => {
   let child = document.createElement("li");
   let btnChild = document.createElement("button");
   let textChild = document.createElement('p');
   textChild.innerText = value;
   if (f === "remove") {
-    btnChild.innerText = "X";
+    btnChild.innerHTML = "<span style='color: white; background-color: red; padding-left: 10px; font-size: 1rem'>X</span>";
+    btnChild.style.backgroundColor = "red";
     btnChild.onclick = () => removeMember(value);
   } else if (f === "add") {
-    btnChild.innerText = "+";
+    btnChild.innerHTML = "<span style='color: yellow; background-color: green; padding-left: 10px; font-size: 1rem'>+</span>";
+    btnChild.style.backgroundColor = "green";
     btnChild.onclick = () => addMember(value);
   }
   textChild.appendChild(btnChild);
@@ -59,9 +72,10 @@ const generateMemberItem = (value, f = "add") => {
   return child;
 }
 
+// What to do if message received
 const handleMessage = (message, sender, sendResponse) => {
-  sendResponse({status: true});
-  chrome.storage.local.get(function (result) {
+  sendResponse({status: true}); // send reply to tabs
+  BrowserInstance.storage.local.get(function (result) {
     const showing = result.showing;
     if (showing === "0" && message.mutedList) {
       renderLiveResult(JSON.parse(message.mutedList).arr);
@@ -81,22 +95,24 @@ const handleMessage = (message, sender, sendResponse) => {
   })
 }
 
+// Remove active CSS from all navbar button (CSS deactivation only)
 const inactiveAll = () => {
   for (let button of buttonList) {
     document.getElementById(button).classList.remove("active");
   }
 }
 
+// Function to remove member from range member
 const removeMember = (member) => {
-  chrome.tabs.query(params, tabs => chrome.tabs.sendMessage(tabs[0].id, [5, member]));
-
+  sendMessage([5, member]); // remove member from tab data
   const memberIndex = rangeMembers.indexOf(member);
   if (memberIndex !== -1) {
     rangeMembers.splice(memberIndex, 1);
   }
-  fillSettingsRequest();
+  sendMessage([3]); // request for all members and rangeMembers
 }
 
+// Render live result in popup
 const renderLiveResult = (arr) => {
   document.getElementById("setting-form").style.display = "none";
   let parent = document.getElementById("live-result");
@@ -114,6 +130,7 @@ const renderLiveResult = (arr) => {
   }
 }
 
+// Show percent of presence in popup
 const renderPercentPresent = (tableArr) => {
   const table = document.createElement('table')
   for (let rowArr of tableArr) {
@@ -132,43 +149,47 @@ const renderPercentPresent = (tableArr) => {
   parent.appendChild(table);
 }
 
+// Button listeners
 window.onload = () => {
-  document.getElementById("startButton").addEventListener("click", function (permissionDesc) {
-    chrome.tabs.query(params, tabs => chrome.tabs.sendMessage(tabs[0].id, [1]));
-    chrome.storage.local.set({running: "1"});
+  // Start button listener
+  document.getElementById("startButton").addEventListener("click", () => {
+    sendMessage([1]);
+    BrowserInstance.storage.local.set({running: "1"});
     document.getElementById('startButton').style.display = "none";
     document.getElementById('stopButton').style.display = "block";
     document.getElementById('nav-btn').style.display = "block";
   });
-
-  document.getElementById("add-member-btn").addEventListener("click", function () {
+  // Add new member button listener
+  document.getElementById("add-member-btn").addEventListener("click", () => {
     const member = document.getElementById("included").value;
     document.getElementById("included").value = "";
     if (member) addMember(member);
   });
 
+  // Navbar buttons listener
   for (let button of buttonList) {
-    document.getElementById(button).addEventListener("click", function () {
+    document.getElementById(button).addEventListener("click", () => {
       inactiveAll();
-      chrome.storage.local.set({showing: buttonList.indexOf(button).toString()}, function () {
-      });
+      BrowserInstance.storage.local.set({showing: buttonList.indexOf(button).toString()});
       document.getElementById(button).classList.add("active");
-      if (button === "settings") {
+      if (button === "settings") { // different behaviour if clicked on + icon
         document.getElementById("setting-form").style.display = "block";
-        fillSettingsRequest();
+        sendMessage([3]); // request for all members and rangeMembers
       }
     });
   }
 
-  document.getElementById("stopButton").addEventListener("click", function () {
-    chrome.tabs.query(params, tabs => chrome.tabs.sendMessage(tabs[0].id, [2]));
-    chrome.storage.local.set({running: "0"});
+  // Stop button listener
+  document.getElementById("stopButton").addEventListener("click", () => {
+    sendMessage([2]);
+    BrowserInstance.storage.local.set({running: "0"});
     document.getElementById('startButton').style.display = "block";
     document.getElementById('stopButton').style.display = "none";
     document.getElementById('nav-btn').style.display = "none";
   });
 
-  chrome.storage.local.get(function (result) {
+  // Set initial state by checking configuration from local storage
+  BrowserInstance.storage.local.get(result => {
     const running = result.running;
     const showing = result.showing;
     if (running === "1") {
@@ -184,4 +205,4 @@ window.onload = () => {
   });
 }
 
-chrome.runtime.onMessage.addListener(handleMessage);
+BrowserInstance.runtime.onMessage.addListener(handleMessage);
