@@ -1,68 +1,77 @@
-# Zoom Meet Attendance
-You can use this to who when attended the meeting and when left. This extension will 
-collect information and will make a text file. You can create a graph using below 
-Python script. All activities of this extension happens on your browser and never 
-send any information anywhere.
-## Limitation
-You must show participants list otherwise extension won't be able to collect information.
-![alt "show extension"](https://drive.google.com/uc?export=download&id=1F9D-Fovs3fmveWScrEf43vuJDmtNvH_T)
+# Meeting helper
+
+You can use this to who when attended the meeting and when left. You can also see when a user turned his microphone or
+camera off. This extension will collect information during meeting and will make a text file and HTML graph report. You
+can use the graph directly for good overview of the participants. Also, you can use the Text file for further
+processing. All activities of this extension happens on your browser and never make any HTTP request nor save
+permanently.
+
+## Features
+
+1. See a list of participants whose microphone is off.
+2. See a list of participants whose video is off.
+3. See absent participants list.
+4. See extra participants list.
+5. See how much time a participants was active.
+6. A text file with realtime data when extension stopped.
+7. A HTML file with realtime graph data when extension stopped
+
+### Meaning of color and number in HTML and Text file
+
+1. 0 and red color stand for absent
+2. 1 and black color stand for present but microphone and video was off
+3. 3 and yellow stand for present but video was off
+4. 4 and blue color stand for present but microphone was off
+5. 6 and green color stand for present and microphone and video was on.
+
+<em>Each pixel in html stands for 1 seconds</em><br>
+<em>These indicator works only in Zoom. These features are not supported in Google meet.</em>
+
 ## How to use
+
 ### Load extension
+
 <ol>
 <li><h5>Clone the project.</h5>
 <pre>
-git clone https://github.com/mahbd/zoom_meet_attendance
+git clone https://github.com/mahbd/meeting-helper.git
 </pre>
 </li>
+<li>
+Load the folder in your preferred browser. Firefox and Google chrome is supported.
+</li>
+</ol>
 If you don't know how to load extension in chrome use this 
 <a href="https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/">guide</a>.
+For firefox use this 
+<a href="https://blog.mozilla.org/addons/2015/12/23/loading-temporary-add-ons/">guide</a>
+
+## User guide
+
+<ol>
+<li>
+Start or join in your meeting.
+</li>
+<li>
+
+Click on meeting helper icon.
+![Alt text](images/start_the_extension.png?raw=true "Start meeting helper")
+</li>
+<li>
+Click on microphone off icon to see whose microphone is off.
+
+![Alt text](images/microphone.png?raw=true "Microphone")
+</li>
+<li>Click on video off icon to view whose video is off</li>
+<li>Click on people cross icon to see who are absent from meeting</li>
+<li>Click on people plus icon to see extra member list who are not
+part of the meeting</li>
+<li>Click on multi round button to see how much time a user is present.
+(Google Meet reduce 1 second).</li>
+<li>Click on plus icon to add new member. This won't add a member
+to the meeting. This is just to see who is absent and extra member
+list. You can click on suggested member to add new member or you can
+manually enter user using input box. You can remove member by clicking
+X icon. Again this will not remove user from meeting. This will be used
+to list absent and extra members.</li>
 </ol>
-
-### Start the extension
-Start your meeting
-Show participants list like below
-![alt "Zoom participants list"](https://drive.google.com/uc?export=download&id=1EcnO_JZ-ZY29vBHOjws6fGam9a-VgwBm)
-<br> Image for zoom <br>
-![alt "Meet participants list"](https://drive.google.com/uc?export=download&id=1AKwkyypou17lco9HdUjjI0-JGP9s0VK8)
-<br>For meet<br>
-Now click on the extension icon and click start.
-![alt "Start"](https://drive.google.com/uc?export=download&id=16nsh1IVXdVXyV316-LVrmQsSHZJDNpxZ)
-<br>
-Before ending the meeting click save recording. As soon as you click save a text file will be downloaded.
-![alt "Save"](https://drive.google.com/uc?export=download&id=10y2rpDARMckfEqAGfqxbPFNWr6zkFVP9)
-You're done. You may visualize your data using below python script.
-## Visualize using python script
-If you want better visualization experience use you may use this 
-<a href="https://github.com/mahbd/zoom_meet_attendance_visualizer">module</a>. Or use below code for basic
-visualization.
-### requirements 
-numpy, matplotlib, seaborn
-### code 
-<pre>import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib import pyplot
-
-with open('your text file name', 'r') as file:
-    lines = file.readlines()
-    title = lines[0]
-    names, data = [], []
-    for line in lines[1:]:
-        cols = line.strip().split(',')
-        names.append(cols[0])
-        data.append([int(x) for x in cols[1:]])
-data = np.array(data)
-print(data)
-a4_dims = (11.7, 8.27)
-fig, ax = pyplot.subplots(figsize=a4_dims)
-sns.heatmap(ax=ax, data=data, cbar=False)
-ax.set_title(title)
-ax.set_yticklabels(names)
-plt.setp(ax.get_yticklabels(), rotation=0, ha="right",
-         rotation_mode="anchor")
-for i in range(data.shape[0] + 1):
-    ax.axhline(i, color='white', lw=2)
-plt.show()
-</pre>
-### Examples
-![alt "Examples"](https://drive.google.com/uc?export=download&id=17PxaauWlya3BuxTGddkOMCaiRmWQgUk8)
