@@ -1,15 +1,6 @@
-chrome.runtime.onMessage.addListener(startIt);
-let arrayAttendance = [];
-let percentAttendance = {};
-let totalSeconds = 0;
-let rangeMembers = [];
-let interval = [];
-let intervalId = 0;
+let arrayAttendance = [], intervalId = 0, interval = [], percentAttendance = {}, rangeMembers = [], totalSeconds = 0;
 let today = new Date();
-let month = today.getMonth();
-let year = today.getFullYear();
-let day = today.getDay();
-let hours = today.getHours();
+let month = today.getMonth(), year = today.getFullYear(), day = today.getDay(), hours = today.getHours();
 let file_name = "Attendance:" + hours + "hrs-" + day + "-" + month + ".txt";
 
 window.onload = function () {
@@ -17,9 +8,8 @@ window.onload = function () {
   chrome.storage.local.clear();
 }
 
-function startIt(message, sender, sendResponse) {
+const startIt = (message, sender, sendResponse) => {
   if (message[0] === 1) {
-    console.log("Taking attendance");
     interval[intervalId++] = setInterval(takeAttendance, 1000);
   } else if (message[0] === 2) {
     for (let i = 0; i < interval.length; i++) {
@@ -39,23 +29,20 @@ function startIt(message, sender, sendResponse) {
     if (memberIndex !== -1) {
       rangeMembers.splice(memberIndex, 1);
     }
-  } else {
-    console.log(message)
   }
 }
 
 const takeAttendance = () => {
   if (document.domain === "meet.google.com") {
-    console.log("Taking attendance from meet")
     meetAttendance();
   }
   if (document.domain === "us04web.zoom.us" || document.domain === "bdren.zoom.us") {
-    console.log("Taking attendance from zoom")
     zoomAttendance();
   }
 }
 
 const meetAttendance = () => {
+  totalSeconds += 1;
   const currentAttendance = [];
   const currentAllStatus = {};
   let memberList = document.getElementsByClassName("KV1GEc");
@@ -72,11 +59,11 @@ const meetAttendance = () => {
   arrayAttendance.push(currentAllStatus);
   genAbsentMembers(currentAttendance);
   genExtraMembers(currentAttendance);
-  totalSeconds += 1;
   genLivePresent();
 }
 
 const zoomAttendance = () => {
+  totalSeconds += 1;
   const currentAttendance = [];
   const currentAllStatus = {};
   let muted = [];
@@ -105,7 +92,6 @@ const zoomAttendance = () => {
   saveNoVideo(noVideo);
   genAbsentMembers(currentAttendance);
   genExtraMembers(currentAttendance);
-  totalSeconds += 1;
   genLivePresent();
 }
 
@@ -128,7 +114,9 @@ const genAbsentMembers = (currentMembers) => {
       absentMembers.push(member);
     }
   }
-  saveAbsent(absentMembers);
+  let data = {arr: absentMembers};
+  chrome.runtime.sendMessage({absentMembers: JSON.stringify(data)}, function (response) {
+  });
 }
 
 const genExtraMembers = (currentMembers) => {
@@ -138,30 +126,20 @@ const genExtraMembers = (currentMembers) => {
       extraMembers.push(member);
     }
   }
-  saveExtra(extraMembers);
+  let data = {arr: extraMembers};
+  chrome.runtime.sendMessage({extraMembers: JSON.stringify(data)}, function (response) {
+  });
 }
 
-function saveMuted(mutedList = []) {
+const saveMuted = (mutedList = []) => {
   let data = {arr: mutedList};
   chrome.runtime.sendMessage({mutedList: JSON.stringify(data)}, function (response) {
   });
 }
 
-function saveNoVideo(mutedList = []) {
+const saveNoVideo = (mutedList = []) => {
   let data = {arr: mutedList};
   chrome.runtime.sendMessage({noVideo: JSON.stringify(data)}, function (response) {
-  });
-}
-
-function saveAbsent(mutedList = []) {
-  let data = {arr: mutedList};
-  chrome.runtime.sendMessage({absentMembers: JSON.stringify(data)}, function (response) {
-  });
-}
-
-function saveExtra(mutedList = []) {
-  let data = {arr: mutedList};
-  chrome.runtime.sendMessage({extraMembers: JSON.stringify(data)}, function (response) {
   });
 }
 
@@ -197,3 +175,5 @@ const saveToFile = () => {
   URL.revokeObjectURL(a.href)
   a.remove();
 }
+
+chrome.runtime.onMessage.addListener(startIt);

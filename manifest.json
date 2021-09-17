@@ -1,9 +1,8 @@
 {
-
     "manifest_version": 2,
-    "name": "Meeting attend record",
-    "version": "0.9",
-    "description": "Record attend time and leave time",
+    "name": "Meeting helper",
+    "version": "2.0",
+    "description": "Record attend time and leave time and live show who is muted, who's video off, absent members",
     "author": "Mahmudul Alam",
     "permissions": [
       "tabs",
@@ -13,16 +12,13 @@
     "content_scripts": [
       {
         "matches": ["*://meet.google.com/*" , "*://zoom.us/*","*://us04web.zoom.us/*", "*://bdren.zoom.us/*"],
-        "js": ["attendance.js"]
+        "js": ["src/attendance.js"]
       }
     ],
-    
-    "background": {
-        "scripts": ["background.js"]
-    },
+
     "browser_action": {
-        "default_icon": "Meet.png",
-        "default_popup": "popup.html",
-        "default_title": "Meeting Recorder"
+        "default_icon": "images/Meet.png",
+        "default_popup": "src/popup.html",
+        "default_title": "Meeting Helper"
     }
 }
