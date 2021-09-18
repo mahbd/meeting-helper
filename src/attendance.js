@@ -69,7 +69,7 @@ const takeAttendance = () => {
   if (document.domain === "meet.google.com") {
     meetAttendance();
   }
-  if (document.domain === "us04web.zoom.us" || document.domain === "bdren.zoom.us" || document.domain === "zoom.us") {
+  if (document.domain.indexOf("zoom.us") !== -1) {
     zoomAttendance();
   }
 }

@@ -30,7 +30,7 @@ permanently.
 ## Issues
 If Zoom meeting url doesn't start with <code>us04web</code> or <code>bdren</code> this
 extension won't work. If this happens please change url to <code> https://us04web.zoom.us/... </code> 
-in your browser address bar.
+in your browser address bar. For more details check <a href=https://github.com/mahbd/meeting-helper/issues/1>here</a>
 
 ## How to Install
 
