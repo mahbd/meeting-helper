@@ -27,8 +27,17 @@ permanently.
 <em>Each pixel in html stands for 1 seconds</em><br>
 <em>These indicator works only in Zoom. These features are not supported in Google meet.</em>
 
+## Issues
+If Zoom meeting url doesn't start with <code>us04web</code> or <code>bdren</code> this
+extension won't work. If this happens please change url to <code> https://us04web.zoom.us/... </code> 
+in your browser address bar.
+
 ## How to Install
 
+Firefox's users can install this extension directly from 
+<a href=https://addons.mozilla.org/en-US/firefox/addon/meeting-helper/>Firefox Addon Store</a>
+
+For Google Chrome users: 
 <ol>
 <li><h5>Clone the project.</h5>
 <pre>
@@ -40,13 +49,7 @@ Load the folder in your preferred browser. Firefox and Google chrome is supporte
 </li>
 </ol>
 If you don't know how to load extension in chrome use this 
-<a href="https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/">guide</a>.
-For firefox use this 
-<a href="https://blog.mozilla.org/addons/2015/12/23/loading-temporary-add-ons/">guide</a>
-
-<em>The firefox version of this extension is submitted for review in
-Firefox Addons Store. It will be available 
-<a href="https://addons.mozilla.org/en-US/firefox/addon/meeting-helper/">here</a> as soon as it is reviewed.</em>
+<a href="https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/">guide</a>
 
 ## User guide
 
@@ -55,8 +58,11 @@ Firefox Addons Store. It will be available
 Start or join in your meeting.
 </li>
 <li>
-
 Click on meeting helper icon.
+</li>
+<li>
+Click on start button to start extension function.
+
 ![Alt text](images/start_the_extension.png?raw=true "Start meeting helper")
 </li>
 <li>
@@ -85,4 +91,3 @@ is text file another is HTML file. The HTML file will looks like
 ![Alt text](images/report.png?raw=true "Report")
 </li>
 </ol>
-
