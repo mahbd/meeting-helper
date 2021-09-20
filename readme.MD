@@ -35,6 +35,9 @@ No known issue
 Firefox's users can install this extension directly from 
 <a href=https://addons.mozilla.org/en-US/firefox/addon/meeting-helper/>Firefox Addon Store</a>
 
+Microsoft Edge's users can install this extension directly from 
+<a href=https://microsoftedge.microsoft.com/addons/detail/meeting-helper/kdhkgebfnjikmfeokgopahhlnlaghdnc>Edge Addon Store</a>
+
 For Google Chrome users: 
 <ol>
 <li><h5>Clone the project.</h5>

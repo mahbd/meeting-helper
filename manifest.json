@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Meeting helper",
     "version": "2.0.1",
-    "description": "Record attend time and leave time and live show who is muted, who's video off, absent members",
+    "description": "Show attend time and leave time and live show who is muted, who's video off, absent members",
     "author": "Mahmudul Alam",
     "permissions": [
       "tabs",
